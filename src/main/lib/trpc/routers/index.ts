@@ -21,6 +21,8 @@ import { pluginsRouter } from "./plugins"
 import { browserAutomationRouter } from "./browser-automation"
 import { socialAuthRouter } from "./social-auth"
 import { buildCapabilitiesRouter } from "./build-capabilities"
+import { llmProvidersRouter } from "./llm-providers"
+import { apiRouter } from "./api"
 import { createGitRouter } from "../../git"
 import { BrowserWindow } from "electron"
 
@@ -52,6 +54,8 @@ export function createAppRouter(getWindow: () => BrowserWindow | null) {
     socialAuth: socialAuthRouter,
     browserAutomation: browserAutomationRouter,
     buildCapabilities: buildCapabilitiesRouter,
+    llmProviders: llmProvidersRouter,
+    api: apiRouter,
     // Git operations - named "changes" to match Superset API
     changes: createGitRouter(),
   })

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
+import { useAtom, useSetAtom } from "jotai"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -29,8 +30,14 @@ import {
   Facebook,
   Twitter,
   Linkedin,
-  Github
+  Github,
+  Home,
+  ArrowLeft
 } from "lucide-react"
+import { landingPageRouteAtom, type LandingPageRoute } from "@/lib/atoms"
+import { FeaturesPage, AgentsPage, PricingPage, DocsPage } from "./pages"
+import { AiChatInput, AiChat, PromptInput, type Message } from "@/components/ai"
+import { VideoBackground } from "@/components/video/video-background"
 
 // ============================================
 // THEME PROVIDER
@@ -45,6 +52,20 @@ export function LandingPage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authStep, setAuthStep] = useState<"left" | "right" | "done">("left")
+  const [currentRoute, setCurrentRoute] = useAtom(landingPageRouteAtom)
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      role: "assistant",
+      content: "Hi! I'm your AI coding assistant. I can help you write code, debug issues, and build features. What would you like to work on today?",
+      timestamp: new Date(),
+      metadata: {
+        model: "Claude 3.5 Sonnet",
+        tokens: 45,
+      },
+    },
+  ])
+  const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
     if (darkMode) {
@@ -54,8 +75,72 @@ export function LandingPage() {
     }
   }, [darkMode])
 
+  const navigateTo = (route: LandingPageRoute) => {
+    setCurrentRoute(route)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const renderPage = () => {
+    switch (currentRoute) {
+      case "features":
+        return <FeaturesPage darkMode={darkMode} />
+      case "agents":
+        return <AgentsPage darkMode={darkMode} />
+      case "pricing":
+        return <PricingPage darkMode={darkMode} />
+      case "docs":
+        return <DocsPage darkMode={darkMode} />
+      default:
+        return null // Render home page content inline
+    }
+  }
+
+  const handleSendMessage = (message: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: message,
+      timestamp: new Date(),
+    }
+    setMessages([...messages, userMessage])
+    setIsProcessing(true)
+
+    // Simulate AI response
+    setTimeout(() => {
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "I'd be happy to help with that! Let me analyze your request and provide a solution. This is a demo response - in the actual app, I would connect to the AI backend to generate real responses.",
+        timestamp: new Date(),
+        metadata: {
+          model: "Claude 3.5 Sonnet",
+          tokens: 67,
+          thinking: "Analyzing the user's request to understand the context and requirements...",
+        },
+      }
+      setMessages((prev) => [...prev, aiResponse])
+      setIsProcessing(false)
+    }, 1500)
+  }
+
+  const handleStopGeneration = () => {
+    setIsProcessing(false)
+  }
+
+  const handlePromptGenerate = (prompt: string) => {
+    handleSendMessage(prompt)
+  }
+
   return (
     <div className={`min-h-screen ${darkMode ? "dark bg-gray-950 text-white" : "bg-gray-50 text-gray-900"} transition-colors duration-300`}>
+      {/* Full-screen HLS Video Background with Dark/Light Gradients */}
+      <VideoBackground
+        src="/videos/landing-video.m3u8"
+        poster="/images/landing-poster.jpg"
+        darkMode={darkMode}
+        overlayOpacity={0.5}
+      />
+
       {/* Fixed Background Motion with Waves */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient-xy" />
@@ -158,6 +243,8 @@ export function LandingPage() {
         cartOpen={cartOpen}
         setCartOpen={setCartOpen}
         setAuthModalOpen={setAuthModalOpen}
+        currentRoute={currentRoute}
+        navigateTo={navigateTo}
       />
 
       {/* Collapsible Sidebar */}
@@ -203,35 +290,52 @@ export function LandingPage() {
 
       {/* Main Content - Fixed Width/Height Layout */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section 1: Hero */}
-        <HeroSection darkMode={darkMode} onStartAuth={() => setAuthModalOpen(true)} />
+        {currentRoute === "home" ? (
+          <>
+            {/* Section 1: Hero */}
+            <HeroSection
+              darkMode={darkMode}
+              onStartAuth={() => setAuthModalOpen(true)}
+              messages={messages}
+              isProcessing={isProcessing}
+              onSendMessage={handleSendMessage}
+              onStop={handleStopGeneration}
+            />
 
-        {/* Section 2: Features */}
-        <FeaturesSection darkMode={darkMode} />
+            {/* Section 2: Features */}
+            <FeaturesSection
+              darkMode={darkMode}
+              onNavigateToFeatures={() => navigateTo("features")}
+              onPromptGenerate={handlePromptGenerate}
+            />
 
-        {/* Section 3: Agents Documentation */}
-        <AgentsSection darkMode={darkMode} />
+            {/* Section 3: Agents Documentation */}
+            <AgentsSection darkMode={darkMode} onNavigateToAgents={() => navigateTo("agents")} />
 
-        {/* Section 4: Platform Support */}
-        <PlatformSection darkMode={darkMode} />
+            {/* Section 4: Platform Support */}
+            <PlatformSection darkMode={darkMode} />
 
-        {/* Section 5: Social Integration */}
-        <SocialSection darkMode={darkMode} />
+            {/* Section 5: Social Integration */}
+            <SocialSection darkMode={darkMode} />
 
-        {/* Section 6: User Dashboard Preview */}
-        <DashboardSection darkMode={darkMode} />
+            {/* Section 6: User Dashboard Preview */}
+            <DashboardSection darkMode={darkMode} />
 
-        {/* Section 7: Models Documentation */}
-        <ModelsSection darkMode={darkMode} />
+            {/* Section 7: Models Documentation */}
+            <ModelsSection darkMode={darkMode} />
 
-        {/* Section 8: Pricing */}
-        <PricingSection darkMode={darkMode} onOpenCart={() => setCartOpen(true)} />
+            {/* Section 8: Pricing */}
+            <PricingSection darkMode={darkMode} onOpenCart={() => setCartOpen(true)} onNavigateToPricing={() => navigateTo("pricing")} />
 
-        {/* Section 9: Mobile App */}
-        <MobileSection darkMode={darkMode} />
+            {/* Section 9: Mobile App */}
+            <MobileSection darkMode={darkMode} />
 
-        {/* Section 10: CTA */}
-        <CTASection darkMode={darkMode} onStartAuth={() => setAuthModalOpen(true)} />
+            {/* Section 10: CTA */}
+            <CTASection darkMode={darkMode} onStartAuth={() => setAuthModalOpen(true)} />
+          </>
+        ) : (
+          renderPage()
+        )}
       </div>
 
       {/* Footer */}
@@ -251,6 +355,8 @@ function Header({
   cartOpen,
   setCartOpen,
   setAuthModalOpen,
+  currentRoute,
+  navigateTo,
 }: {
   darkMode: boolean
   setDarkMode: (value: boolean) => void
@@ -259,22 +365,58 @@ function Header({
   cartOpen: boolean
   setCartOpen: (value: boolean) => void
   setAuthModalOpen: (value: boolean) => void
+  currentRoute: LandingPageRoute
+  navigateTo: (route: LandingPageRoute) => void
 }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/10 dark:bg-black/10 border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
+          {currentRoute !== "home" && (
+            <button
+              onClick={() => navigateTo("home")}
+              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors mr-2"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
           <Code2 className="w-8 h-8 text-blue-500" />
           <span className="text-xl font-bold">GSDEV</span>
         </div>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <button onClick={() => console.log('Navigate to features')} className="hover:text-blue-500 transition-colors">Features</button>
-          <button onClick={() => console.log('Navigate to agents')} className="hover:text-blue-500 transition-colors">Agents</button>
-          <button onClick={() => console.log('Navigate to pricing')} className="hover:text-blue-500 transition-colors">Pricing</button>
-          <button onClick={() => console.log('Navigate to docs')} className="hover:text-blue-500 transition-colors">Docs</button>
+          <button
+            onClick={() => navigateTo("home")}
+            className={`hover:text-blue-500 transition-colors ${currentRoute === "home" ? "text-blue-500" : ""}`}
+          >
+            Home
+          </button>
+          <button
+            onClick={() => navigateTo("features")}
+            className={`hover:text-blue-500 transition-colors ${currentRoute === "features" ? "text-blue-500" : ""}`}
+          >
+            Features
+          </button>
+          <button
+            onClick={() => navigateTo("agents")}
+            className={`hover:text-blue-500 transition-colors ${currentRoute === "agents" ? "text-blue-500" : ""}`}
+          >
+            Agents
+          </button>
+          <button
+            onClick={() => navigateTo("pricing")}
+            className={`hover:text-blue-500 transition-colors ${currentRoute === "pricing" ? "text-blue-500" : ""}`}
+          >
+            Pricing
+          </button>
+          <button
+            onClick={() => navigateTo("docs")}
+            className={`hover:text-blue-500 transition-colors ${currentRoute === "docs" ? "text-blue-500" : ""}`}
+          >
+            Docs
+          </button>
         </nav>
 
         {/* Actions */}
@@ -396,47 +538,83 @@ function Sidebar({
 // ============================================
 // HERO SECTION
 // ============================================
-function HeroSection({ darkMode, onStartAuth }: { darkMode: boolean; onStartAuth: () => void }) {
+function HeroSection({ darkMode, onStartAuth, messages, isProcessing, onSendMessage, onStop }: {
+  darkMode: boolean
+  onStartAuth: () => void
+  messages: Message[]
+  isProcessing: boolean
+  onSendMessage: (message: string) => void
+  onStop: () => void
+}) {
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center pt-16">
-      <div className="text-center max-w-4xl mx-auto">
+      <div className="text-center max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          className="mb-8"
         >
           <Badge className="mb-4 bg-blue-500/20 text-blue-500 border-blue-500/30">
-            🚀 AI-Powered Development
+            AI-Powered Development
           </Badge>
-
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Build Anything with GSDEV
+          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            Build Faster with AI Agents
           </h1>
-
-          <p className="text-xl md:text-2xl mb-8 text-gray-600 dark:text-gray-400">
-            "Build anything" - The most powerful AI coding agent for developers, designers, and teams.
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+            The ultimate AI-powered development platform. Write, refactor, and debug code with intelligent AI assistance.
           </p>
+        </motion.div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" onClick={onStartAuth} className="text-lg px-8 py-6">
-              Get Started Free
-            </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-              Watch Demo
-            </Button>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex gap-4 justify-center mb-12"
+        >
+          <Button onClick={onStartAuth} size="lg" className="bg-blue-500 hover:bg-blue-600">
+            Get Started Free
+          </Button>
+          <Button size="lg" variant="outline">
+            Watch Demo
+          </Button>
+        </motion.div>
 
-          {/* AI Prompt Input */}
-          <div className={`p-6 rounded-xl ${darkMode ? "bg-gray-900/50" : "bg-white/50"
-            } border border-gray-200 dark:border-gray-800 max-w-2xl mx-auto`}>
-            <Label className="text-sm mb-2 block">Try AI Prompt</Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Describe what you want to build..."
-                className="flex-1"
-              />
-              <Button>Generate</Button>
+        {/* AI Chat Demo */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className={`rounded-2xl border-2 ${darkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} p-6 shadow-2xl max-w-4xl mx-auto`}
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+              <div className="w-3 h-3 rounded-full bg-green-500" />
             </div>
+            <Badge variant="secondary" className="text-xs">Live Demo</Badge>
+          </div>
+          <div className={`rounded-xl overflow-hidden ${darkMode ? "bg-gray-800" : "bg-gray-100"}`} style={{ height: "400px" }}>
+            <AiChat
+              messages={messages}
+              onSendMessage={onSendMessage}
+              isProcessing={isProcessing}
+              onStop={onStop}
+              showThinking
+              showSources
+              showActions
+              className="h-full"
+            />
+          </div>
+          <div className="mt-4">
+            <AiChatInput
+              onSend={onSendMessage}
+              onStop={onStop}
+              isProcessing={isProcessing}
+              placeholder="Try asking: 'Help me build a React component'"
+              showAttach
+              showVoice
+            />
           </div>
         </motion.div>
       </div>
@@ -447,7 +625,11 @@ function HeroSection({ darkMode, onStartAuth }: { darkMode: boolean; onStartAuth
 // ============================================
 // FEATURES SECTION
 // ============================================
-function FeaturesSection({ darkMode }: { darkMode: boolean }) {
+function FeaturesSection({ darkMode, onNavigateToFeatures, onPromptGenerate }: {
+  darkMode: boolean
+  onNavigateToFeatures?: () => void
+  onPromptGenerate?: (prompt: string) => void
+}) {
   const features = [
     {
       icon: Code2,
@@ -501,6 +683,32 @@ function FeaturesSection({ darkMode }: { darkMode: boolean }) {
           </motion.div>
         ))}
       </div>
+
+      {onNavigateToFeatures && (
+        <div className="text-center mt-12">
+          <Button onClick={onNavigateToFeatures} size="lg">
+            Learn More About Features
+          </Button>
+        </div>
+      )}
+
+      {/* AI Prompt Generator Demo */}
+      {onPromptGenerate && (
+        <div className="mt-16">
+          <h3 className="text-3xl font-bold text-center mb-8">Try AI Prompt Generation</h3>
+          <PromptInput
+            onGenerate={onPromptGenerate}
+            placeholder="Describe what you want to build with AI..."
+            suggestions={[
+              "Create a React component for a user profile card with avatar and bio",
+              "Generate a Python function to sort a list of dictionaries",
+              "Write a SQL query to find duplicate records in a table",
+              "Create a CSS animation for a loading spinner",
+            ]}
+            showSuggestions
+          />
+        </div>
+      )}
     </section>
   )
 }
@@ -508,7 +716,7 @@ function FeaturesSection({ darkMode }: { darkMode: boolean }) {
 // ============================================
 // AGENTS SECTION
 // ============================================
-function AgentsSection({ darkMode }: { darkMode: boolean }) {
+function AgentsSection({ darkMode, onNavigateToAgents }: { darkMode: boolean; onNavigateToAgents?: () => void }) {
   const agents = [
     {
       name: "Code Agent",
@@ -570,6 +778,14 @@ function AgentsSection({ darkMode }: { darkMode: boolean }) {
           </motion.div>
         ))}
       </div>
+
+      {onNavigateToAgents && (
+        <div className="text-center mt-12">
+          <Button onClick={onNavigateToAgents} size="lg">
+            Explore All Agents
+          </Button>
+        </div>
+      )}
     </section>
   )
 }
@@ -761,7 +977,7 @@ function ModelsSection({ darkMode }: { darkMode: boolean }) {
 // ============================================
 // PRICING SECTION
 // ============================================
-function PricingSection({ darkMode, onOpenCart }: { darkMode: boolean; onOpenCart: () => void }) {
+function PricingSection({ darkMode, onOpenCart, onNavigateToPricing }: { darkMode: boolean; onOpenCart: () => void; onNavigateToPricing?: () => void }) {
   const plans = [
     {
       name: "Free",
@@ -844,6 +1060,14 @@ function PricingSection({ darkMode, onOpenCart }: { darkMode: boolean; onOpenCar
           </CardContent>
         </Card>
       </div>
+
+      {onNavigateToPricing && (
+        <div className="text-center mt-12">
+          <Button onClick={onNavigateToPricing} size="lg" variant="outline">
+            View All Pricing Plans
+          </Button>
+        </div>
+      )}
     </section>
   )
 }

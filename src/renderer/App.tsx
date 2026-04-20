@@ -26,7 +26,7 @@ import {
 import { atomWithStorage } from "jotai/utils"
 
 // Atom to control landing page visibility
-const showLandingPageAtom = atomWithStorage("show-landing-page", false) // Skip landing page for development
+const showLandingPageAtom = atomWithStorage("show-landing-page", true) // Show landing page by default
 import { appStore } from "./lib/jotai-store"
 import { VSCodeThemeProvider } from "./lib/themes/theme-provider"
 import { trpc } from "./lib/trpc"

@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { ChevronDown, MoreHorizontal, Plus, Trash2 } from "lucide-react"
+import { ChevronDown, MoreHorizontal, Plus, Trash2, Zap } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -16,7 +16,17 @@ import {
   type CustomClaudeConfig,
 } from "../../../lib/atoms"
 import { ClaudeCodeIcon, CodexIcon, SearchIcon } from "../../ui/icons"
-import { CLAUDE_MODELS, CODEX_MODELS } from "../../../features/agents/lib/models"
+import {
+  CLAUDE_MODELS,
+  CODEX_MODELS,
+  META_MODELS,
+  GROQ_MODELS,
+  TOGETHER_MODELS,
+  HUGGINGFACE_MODELS,
+  OLLAMA_MODELS,
+  OPENSOURCE_MODELS,
+  ALL_MODELS
+} from "../../../features/agents/lib/models"
 import { trpc } from "../../../lib/trpc"
 import { Badge } from "../../ui/badge"
 import { Button } from "../../ui/button"
@@ -239,23 +249,23 @@ function AnthropicAccountsSection() {
 
   return (
     <div className="bg-background rounded-lg border border-border overflow-hidden divide-y divide-border">
-        {isAccountsLoading ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            Loading accounts...
-          </div>
-        ) : (
-          accounts?.map((account) => (
-            <AccountRow
-              key={account.id}
-              account={account}
-              isActive={activeAccount?.id === account.id}
-              onSetActive={() => setActiveMutation.mutate({ accountId: account.id })}
-              onRename={() => handleRename(account.id, account.displayName)}
-              onRemove={() => handleRemove(account.id, account.displayName)}
-              isLoading={isLoading}
-            />
-          ))
-        )}
+      {isAccountsLoading ? (
+        <div className="p-4 text-center text-sm text-muted-foreground">
+          Loading accounts...
+        </div>
+      ) : (
+        accounts?.map((account) => (
+          <AccountRow
+            key={account.id}
+            account={account}
+            isActive={activeAccount?.id === account.id}
+            onSetActive={() => setActiveMutation.mutate({ accountId: account.id })}
+            onRename={() => handleRename(account.id, account.displayName)}
+            onRemove={() => handleRemove(account.id, account.displayName)}
+            isLoading={isLoading}
+          />
+        ))
+      )}
     </div>
   )
 }
@@ -483,15 +493,35 @@ export function AgentsModelsTab() {
     }
   }
 
-  // All models merged into one list for the top section
+  // All models merged into one list with open source priority
   const allModels = useMemo(() => {
-    const items: { id: string; name: string; provider: "claude" | "codex" }[] = []
+    const items: {
+      id: string;
+      name: string;
+      provider: string;
+      isOpenSource?: boolean;
+      isLocal?: boolean;
+    }[] = []
+
+    // Open source models first (prioritized)
+    for (const m of OPENSOURCE_MODELS) {
+      items.push({
+        id: m.id,
+        name: m.name,
+        provider: m.provider || "Unknown",
+        isOpenSource: m.isOpenSource,
+        isLocal: (m as any).isLocal,
+      })
+    }
+
+    // Then proprietary models
     for (const m of CLAUDE_MODELS) {
       items.push({ id: m.id, name: `${m.name} ${m.version}`, provider: "claude" })
     }
     for (const m of CODEX_MODELS) {
       items.push({ id: m.id, name: m.name, provider: "codex" })
     }
+
     return items
   }, [])
 
@@ -540,11 +570,22 @@ export function AgentsModelsTab() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{m.name}</span>
-                    {m.provider === "claude" ? (
-                      <ClaudeCodeIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                    ) : (
-                      <CodexIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                    )}
+                    <div className="flex items-center gap-1">
+                      {m.isOpenSource && (
+                        <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
+                          <Zap className="h-2.5 w-2.5 mr-1" />
+                          Open Source
+                        </Badge>
+                      )}
+                      {m.isLocal && (
+                        <Badge variant="secondary" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/20">
+                          Local
+                        </Badge>
+                      )}
+                      <Badge variant="outline" className="text-xs text-muted-foreground">
+                        {m.provider}
+                      </Badge>
+                    </div>
                   </div>
                   <Switch
                     checked={isEnabled}
@@ -729,6 +770,82 @@ export function AgentsModelsTab() {
                   onBlur={handleSaveOpenAI}
                   className="w-full"
                   placeholder="sk-..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Groq API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Groq API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  Fast open-source models (LLaMA, Mixtral, Gemma)
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="gsk_..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Together AI API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Together AI API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  Open-source models (LLaMA, Qwen, DeepSeek)
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Hugging Face API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Hugging Face API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  Access to thousands of open-source models
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="hf_..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Meta API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Meta API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  Official Meta LLaMA models
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="..."
                 />
               </div>
             </div>

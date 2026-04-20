@@ -1014,3 +1014,33 @@ export const mcpApprovalDialogOpenAtom = atom<boolean>(false)
 
 // Pending MCP approvals to show in the dialog
 export const pendingMcpApprovalsAtom = atom<PendingMcpApproval[]>([])
+
+// ============================================
+// PAGE ROUTING ATOMS (Landing Page Navigation)
+// ============================================
+
+export type LandingPageRoute =
+  | "home"
+  | "features"
+  | "agents"
+  | "pricing"
+  | "docs"
+  | "getting-started"
+  | "api-reference"
+  | "guides"
+
+// Current active route on landing page
+export const landingPageRouteAtom = atomWithStorage<LandingPageRoute>(
+  "landing-page-route",
+  "home",
+  undefined,
+  { getOnInit: true },
+)
+
+// Document subsection (for nested docs navigation)
+export const docsSectionAtom = atomWithStorage<string>(
+  "docs-section",
+  "getting-started",
+  undefined,
+  { getOnInit: true },
+)

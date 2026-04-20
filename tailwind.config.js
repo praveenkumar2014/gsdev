@@ -53,6 +53,21 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        "gradient-xy": {
+          "0%, 100%": {
+            "background-size": "400% 400%",
+            "background-position": "left center"
+          },
+          "50%": {
+            "background-size": "200% 200%",
+            "background-position": "right center"
+          }
+        }
+      },
+      animation: {
+        "gradient-xy": "gradient-xy 15s ease infinite"
+      }
     },
   },
   plugins: [require("@tailwindcss/typography"), require("tailwindcss-animate"), require("@tailwindcss/container-queries")],

@@ -5,5 +5,51 @@
   "outputDirectory": "out/renderer",
   "framework": null,
   "installCommand": "bun install",
-  "public": true
+  "public": true,
+  "env": {
+    "API_KEY_GENERATION_URL": "https://api.gsdev.dev/v1/keys/generate",
+    "API_KEY_VERIFICATION_URL": "https://api.gsdev.dev/v1/keys/verify",
+    "APP_BASE_URL": "https://gsdev.dev",
+    "API_BASE_URL": "https://api.gsdev.dev",
+    "WEBHOOK_BASE_URL": "https://webhooks.gsdev.dev"
+  },
+  "functions": {
+    "app/api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

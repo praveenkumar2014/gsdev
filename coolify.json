@@ -1,0 +1,87 @@
+{
+  "name": "gsdev",
+  "version": "1.0.0",
+  "description": "GSDEV - AI-powered code editor with multi-provider LLM support",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "deployments": {
+    "production": {
+      "environment": {
+        "NODE_ENV": "production",
+        "API_KEY_GENERATION_URL": "https://api.gsdev.dev/v1/keys/generate",
+        "API_KEY_VERIFICATION_URL": "https://api.gsdev.dev/v1/keys/verify",
+        "APP_BASE_URL": "https://gsdev.dev",
+        "API_BASE_URL": "https://api.gsdev.dev",
+        "WEBHOOK_BASE_URL": "https://webhooks.gsdev.dev"
+      },
+      "ports": [
+        {
+          "containerPort": 3000,
+          "protocol": "TCP"
+        }
+      ],
+      "healthCheck": {
+        "httpGet": {
+          "path": "/health",
+          "port": 3000
+        },
+        "initialDelaySeconds": 30,
+        "periodSeconds": 10,
+        "timeoutSeconds": 5,
+        "successThreshold": 1,
+        "failureThreshold": 3
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2000m",
+          "memory": "4Gi"
+        },
+        "requests": {
+          "cpu": "500m",
+          "memory": "1Gi"
+        }
+      },
+      "autoscaling": {
+        "minReplicas": 1,
+        "maxReplicas": 10,
+        "targetCPUUtilizationPercentage": 70,
+        "targetMemoryUtilizationPercentage": 80
+      }
+    }
+  },
+  "services": {
+    "web": {
+      "type": "web",
+      "envVars": {
+        "NODE_ENV": "production",
+        "PORT": "3000"
+      }
+    },
+    "worker": {
+      "type": "worker",
+      "envVars": {
+        "NODE_ENV": "production"
+      }
+    }
+  },
+  "databases": [
+    {
+      "type": "postgresql",
+      "name": "gsdev-db",
+      "version": "15"
+    },
+    {
+      "type": "redis",
+      "name": "gsdev-cache",
+      "version": "7"
+    }
+  ],
+  "volumes": [
+    {
+      "name": "uploads",
+      "mountPath": "/app/uploads",
+      "size": "10Gi"
+    }
+  ]
+}
