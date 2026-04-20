@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://*.posthog.com https://*.i.posthog.com; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* http://localhost:* https://unpkg.com https://gsdev.dev https://*.gsdev.dev https://*.posthog.com https://*.i.posthog.com; img-src 'self' data: blob: https:; media-src 'self' blob:;" />
+  <title>GSDEV</title>
+  <!-- Prevent theme flash: detect system/stored theme before render -->
+  <script>
+    (function () {
+      var stored = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var theme = stored === 'light' ? 'light' : stored === 'dark' ? 'dark' : (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  <style>
+    /* Loading state before React loads - respects system theme */
+    :root {
+      --loading-bg: #ffffff;
+      --loading-text: #09090b;
+      --loading-logo: #a1a1aa;
+    }
+
+    .dark {
+      --loading-bg: #09090b;
+      --loading-text: #fafafa;
+      --loading-logo: #71717a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      background: var(--loading-bg);
+      color: var(--loading-text);
+    }
+
+    /* Loading container - hidden when React renders */
+    .loading-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--loading-bg);
+      z-index: 9999;
+      transition: opacity 150ms ease-out;
+    }
+
+    /* Hide loading when root has content */
+    #root:not(:empty)+.loading-container,
+    #root:not(:empty)~.loading-container {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-logo {
+      width: 24px;
+      height: 24px;
+      animation: pulse 1.5s ease-in-out infinite;
+      opacity: var(--loading-logo);
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 0.6;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <!-- Loading indicator - separate from root so :empty works -->
+  <div class="loading-container">
+    <img class="loading-logo" src="./assets/logo.png" alt="GS Groups logo" />
+  </div>
+  <script>
+    console.log("[HTML] Inline script running - scripts work!");
+    window.onerror = function (msg, url, line) {
+      console.error("[HTML] Global error:", msg, "at", url, "line", line);
+      document.getElementById("root").innerHTML = "<pre style='color:red;padding:20px'>Error: " + msg + "</pre>";
+    };
+  </script>
+  <script type="module" src="./main.tsx"></script>
+</body>
+
+</html>
