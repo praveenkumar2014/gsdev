@@ -1,0 +1,9 @@
+{
+  "name": "gsdev",
+  "version": 2,
+  "buildCommand": "bun run build",
+  "outputDirectory": "out/renderer",
+  "framework": null,
+  "installCommand": "bun install",
+  "public": true
+}
