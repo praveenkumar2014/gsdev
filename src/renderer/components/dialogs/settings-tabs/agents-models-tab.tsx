@@ -25,6 +25,9 @@ import {
   HUGGINGFACE_MODELS,
   OLLAMA_MODELS,
   DEVIN_MODELS,
+  KILO_MODELS,
+  CONTINUE_MODELS,
+  DEEPSEEK_MODELS,
   OPENSOURCE_MODELS,
   ALL_MODELS
 } from "../../../features/agents/lib/models"
@@ -522,6 +525,15 @@ export function AgentsModelsTab() {
     for (const m of CODEX_MODELS) {
       items.push({ id: m.id, name: m.name, provider: "codex" })
     }
+    for (const m of KILO_MODELS) {
+      items.push({ id: m.id, name: m.name, provider: m.provider, isOpenSource: m.openSource })
+    }
+    for (const m of CONTINUE_MODELS) {
+      items.push({ id: m.id, name: m.name, provider: m.provider, isOpenSource: m.openSource })
+    }
+    for (const m of DEEPSEEK_MODELS) {
+      items.push({ id: m.id, name: m.name, provider: m.provider, isOpenSource: m.openSource })
+    }
     for (const m of DEVIN_MODELS) {
       items.push({ id: m.id, name: m.name, provider: m.provider, isOpenSource: m.openSource })
     }
@@ -873,13 +885,66 @@ export function AgentsModelsTab() {
               </div>
             </div>
           </div>
-                />
-        </div>
-    </div>
-          </div >
 
-    {/* Override Model */ }
-    < div className = "space-y-2" >
+          {/* Kilo API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Kilo API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  High-performance open-source models
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="kilo_..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Continue API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Continue API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  Code-focused AI assistant models
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* DeepSeek API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">DeepSeek API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  Advanced coding and reasoning models
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="sk-..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Override Model */}
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-foreground">
                 Override Model

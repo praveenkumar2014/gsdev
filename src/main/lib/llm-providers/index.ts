@@ -13,4 +13,7 @@ export * from "./groq"
 export * from "./together"
 export * from "./huggingface"
 export * from "./devin"
-export * from "./devin"
+export * from "./kilo"
+export * from "./continue"
+export * from "./deepseek"
+

@@ -57,6 +57,27 @@ export const DEVIN_MODELS = [
   { id: "devin-auto-v1", name: "Devin Auto v1", provider: "Devin", openSource: false },
 ]
 
+// Kilo models
+export const KILO_MODELS = [
+  { id: "kilo-7b", name: "Kilo 7B", provider: "Kilo", openSource: true },
+  { id: "kilo-13b", name: "Kilo 13B", provider: "Kilo", openSource: true },
+  { id: "kilo-34b", name: "Kilo 34B", provider: "Kilo", openSource: true },
+]
+
+// Continue models
+export const CONTINUE_MODELS = [
+  { id: "continue-codellama", name: "Continue CodeLlama", provider: "Continue", openSource: true },
+  { id: "continue-mistral", name: "Continue Mistral", provider: "Continue", openSource: true },
+  { id: "continue-qwen", name: "Continue Qwen", provider: "Continue", openSource: true },
+]
+
+// DeepSeek models
+export const DEEPSEEK_MODELS = [
+  { id: "deepseek-chat", name: "DeepSeek Chat", provider: "DeepSeek", openSource: true },
+  { id: "deepseek-coder", name: "DeepSeek Coder", provider: "DeepSeek", openSource: true },
+  { id: "deepseek-v3", name: "DeepSeek V3", provider: "DeepSeek", openSource: true },
+]
+
 export const BANANA_MODELS = [
   { id: "banana-small", name: "Banana Small", version: "latest" },
   { id: "banana-medium", name: "Banana Medium", version: "latest" },
@@ -127,6 +148,9 @@ export const ALL_MODELS = {
   huggingface: HUGGINGFACE_MODELS,
   ollama: OLLAMA_MODELS,
   devin: DEVIN_MODELS,
+  kilo: KILO_MODELS,
+  continue: CONTINUE_MODELS,
+  deepseek: DEEPSEEK_MODELS,
 }
 
 // Open source models (prioritized)
@@ -136,6 +160,9 @@ export const OPENSOURCE_MODELS = [
   ...TOGETHER_MODELS,
   ...HUGGINGFACE_MODELS,
   ...OLLAMA_MODELS,
+  ...KILO_MODELS,
+  ...CONTINUE_MODELS,
+  ...DEEPSEEK_MODELS,
 ]
 
 export type ModelProvider = keyof typeof ALL_MODELS

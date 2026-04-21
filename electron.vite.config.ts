@@ -46,35 +46,35 @@ export default defineConfig({
         output: {
           format: "cjs",
         },
-        sourcemap: false,
-
       },
-      renderer: {
-        plugins: [
-          react({
-            // In dev mode, use WDYR as JSX import source to track ALL component re-renders
-            jsxImportSource: isDev
-              ? "@welldone-software/why-did-you-render"
-              : undefined,
-          }),
-        ],
-        resolve: {
-          alias: {
-            "@": resolve(__dirname, "src/renderer"),
-          },
-        },
-        build: {
-          rollupOptions: {
-            input: {
-              index: resolve(__dirname, "src/renderer/index.html"),
-              login: resolve(__dirname, "src/renderer/login.html"),
-            },
-          },
-        },
-        css: {
-          postcss: {
-            plugins: [tailwindcss, autoprefixer],
-          },
+    },
+  },
+  renderer: {
+    plugins: [
+      react({
+        // In dev mode, use WDYR as JSX import source to track ALL component re-renders
+        jsxImportSource: isDev
+          ? "@welldone-software/why-did-you-render"
+          : undefined,
+      }),
+    ],
+    resolve: {
+      alias: {
+        "@": resolve(__dirname, "src/renderer"),
+      },
+    },
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve(__dirname, "src/renderer/index.html"),
+          login: resolve(__dirname, "src/renderer/login.html"),
         },
       },
-    })
+    },
+    css: {
+      postcss: {
+        plugins: [tailwindcss, autoprefixer],
+      },
+    },
+  },
+})
