@@ -24,6 +24,7 @@ import {
   TOGETHER_MODELS,
   HUGGINGFACE_MODELS,
   OLLAMA_MODELS,
+  DEVIN_MODELS,
   OPENSOURCE_MODELS,
   ALL_MODELS
 } from "../../../features/agents/lib/models"
@@ -521,6 +522,9 @@ export function AgentsModelsTab() {
     for (const m of CODEX_MODELS) {
       items.push({ id: m.id, name: m.name, provider: "codex" })
     }
+    for (const m of DEVIN_MODELS) {
+      items.push({ id: m.id, name: m.name, provider: m.provider, isOpenSource: m.openSource })
+    }
 
     return items
   }, [])
@@ -851,8 +855,31 @@ export function AgentsModelsTab() {
             </div>
           </div>
 
-          {/* Override Model */}
-          <div className="space-y-2">
+          {/* Devin Cloud API Key */}
+          <div className="bg-background rounded-lg border border-border overflow-hidden">
+            <div className="flex items-center justify-between gap-6 p-4">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Devin Cloud API Key</Label>
+                <p className="text-xs text-muted-foreground">
+                  AI software engineer platform with agent skills
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-80">
+                <Input
+                  type="password"
+                  className="w-full"
+                  placeholder="devin_..."
+                />
+              </div>
+            </div>
+          </div>
+                />
+        </div>
+    </div>
+          </div >
+
+    {/* Override Model */ }
+    < div className = "space-y-2" >
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-foreground">
                 Override Model
@@ -919,9 +946,9 @@ export function AgentsModelsTab() {
                 </div>
               </div>
             </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
+          </div >
+        </CollapsibleContent >
+      </Collapsible >
+    </div >
   )
 }

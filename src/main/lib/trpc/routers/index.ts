@@ -23,6 +23,7 @@ import { socialAuthRouter } from "./social-auth"
 import { buildCapabilitiesRouter } from "./build-capabilities"
 import { llmProvidersRouter } from "./llm-providers"
 import { apiRouter } from "./api"
+import { devinRouter } from "./devin"
 import { createGitRouter } from "../../git"
 import { BrowserWindow } from "electron"
 
@@ -55,6 +56,7 @@ export function createAppRouter(getWindow: () => BrowserWindow | null) {
     browserAutomation: browserAutomationRouter,
     buildCapabilities: buildCapabilitiesRouter,
     llmProviders: llmProvidersRouter,
+    devin: devinRouter,
     api: apiRouter,
     // Git operations - named "changes" to match Superset API
     changes: createGitRouter(),

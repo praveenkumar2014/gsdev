@@ -236,8 +236,8 @@ export function FeaturesPage({ darkMode }: { darkMode: boolean }) {
           viewport={{ once: true }}
           className="mt-16"
         >
-          <h2 className="text-3xl font-bold text-center mb-8">Try AI Chat</h2>
-          <Card className={`max-w-4xl mx-auto ${darkMode ? "bg-gray-900/50 border-gray-800" : ""}`}>
+          <h2 className={`text-3xl font-bold text-center mb-8 ${darkMode ? "text-white" : "text-gray-900"}`}>Try AI Chat</h2>
+          <Card className={`max-w-4xl mx-auto ${darkMode ? "bg-gray-900/50 border-gray-800" : "bg-white border-gray-200"}`}>
             <CardContent className="p-6">
               <div className={`rounded-xl overflow-hidden ${darkMode ? "bg-gray-800" : "bg-gray-100"}`} style={{ height: "300px" }}>
                 <AiChat

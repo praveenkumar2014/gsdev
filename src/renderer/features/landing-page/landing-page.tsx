@@ -50,7 +50,7 @@ export function LandingPage() {
   const [darkMode, setDarkMode] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
-  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false) // Disabled for testing
   const [authStep, setAuthStep] = useState<"left" | "right" | "done">("left")
   const [currentRoute, setCurrentRoute] = useAtom(landingPageRouteAtom)
   const [messages, setMessages] = useState<Message[]>([
@@ -105,17 +105,34 @@ export function LandingPage() {
     setMessages([...messages, userMessage])
     setIsProcessing(true)
 
-    // Simulate AI response
+    // Simulate AI response with more realistic responses based on message content
     setTimeout(() => {
+      let responseContent = ""
+      let thinking = ""
+
+      if (message.toLowerCase().includes("react") || message.toLowerCase().includes("component")) {
+        thinking = "Analyzing React component requirements..."
+        responseContent = "I can help you build a React component! Here's a simple example:\n\n```tsx\nimport React from 'react'\n\ninterface Props {\n  title: string\n  children: React.ReactNode\n}\n\nexport function Card({ title, children }: Props) {\n  return (\n    <div className=\"p-4 border rounded-lg\">\n      <h2 className=\"text-xl font-bold\">{title}</h2>\n      {children}\n    </div>\n  )\n}\n```\n\nWould you like me to customize this further?"
+      } else if (message.toLowerCase().includes("python") || message.toLowerCase().includes("function")) {
+        thinking = "Generating Python function..."
+        responseContent = "Here's a Python function example:\n\n```python\ndef process_data(data: list) -> dict:\n    \"\"\"Process and analyze data\"\"\"\n    return {\n        'count': len(data),\n        'sum': sum(data) if all(isinstance(x, (int, float)) for x in data) else 0\n    }\n```\n\nLet me know if you need any modifications!"
+      } else if (message.toLowerCase().includes("help")) {
+        thinking = "Understanding how to assist..."
+        responseContent = "I'm your AI coding assistant! I can help you with:\n\n• Writing code in various languages\n• Debugging issues\n• Explaining concepts\n• Refactoring code\n• Building features\n\nJust tell me what you'd like to work on!"
+      } else {
+        thinking = "Processing the request..."
+        responseContent = "I understand you want help with: " + message + "\n\nLet me provide a solution. In a production environment, this would connect to the actual AI backend (Claude, GPT, etc.) to generate a more specific response.\n\nFor now, I can help you with:\n- React/Next.js development\n- Python scripting\n- Database queries\n- API integration\n\nWhat would you like to focus on?"
+      }
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I'd be happy to help with that! Let me analyze your request and provide a solution. This is a demo response - in the actual app, I would connect to the AI backend to generate real responses.",
+        content: responseContent,
         timestamp: new Date(),
         metadata: {
           model: "Claude 3.5 Sonnet",
-          tokens: 67,
-          thinking: "Analyzing the user's request to understand the context and requirements...",
+          tokens: Math.floor(responseContent.length / 4),
+          thinking: thinking,
         },
       }
       setMessages((prev) => [...prev, aiResponse])
@@ -269,15 +286,14 @@ export function LandingPage() {
             onClose={() => setCartOpen(false)}
             onProceedToAuth={() => {
               setCartOpen(false)
-              setAuthModalOpen(true)
-              setAuthStep("right")
+              window.location.href = "/editor"
             }}
           />
         )}
       </AnimatePresence>
 
-      {/* Auth Modal */}
-      <AnimatePresence>
+      {/* Auth Modal - Disabled for testing */}
+      {/* <AnimatePresence>
         {authModalOpen && (
           <AuthModal
             darkMode={darkMode}
@@ -286,7 +302,7 @@ export function LandingPage() {
             setStep={setAuthStep}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       {/* Main Content - Fixed Width/Height Layout */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -295,7 +311,7 @@ export function LandingPage() {
             {/* Section 1: Hero */}
             <HeroSection
               darkMode={darkMode}
-              onStartAuth={() => setAuthModalOpen(true)}
+              onStartAuth={() => window.location.href = "/editor"}
               messages={messages}
               isProcessing={isProcessing}
               onSendMessage={handleSendMessage}
@@ -331,7 +347,7 @@ export function LandingPage() {
             <MobileSection darkMode={darkMode} />
 
             {/* Section 10: CTA */}
-            <CTASection darkMode={darkMode} onStartAuth={() => setAuthModalOpen(true)} />
+            <CTASection darkMode={darkMode} onStartAuth={() => window.location.href = "/editor"} />
           </>
         ) : (
           renderPage()
@@ -376,47 +392,70 @@ function Header({
           {currentRoute !== "home" && (
             <button
               onClick={() => navigateTo("home")}
-              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors mr-2"
+              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <Home className="w-5 h-5" />
             </button>
           )}
-          <Code2 className="w-8 h-8 text-blue-500" />
-          <span className="text-xl font-bold">GSDEV</span>
+          <div className="font-bold text-xl bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+            GSDEV
+          </div>
         </div>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <button
             onClick={() => navigateTo("home")}
-            className={`hover:text-blue-500 transition-colors ${currentRoute === "home" ? "text-blue-500" : ""}`}
+            className={`text-sm font-medium transition-colors ${currentRoute === "home"
+              ? "text-blue-500"
+              : "hover:text-blue-500 dark:hover:text-blue-400"
+              }`}
           >
             Home
           </button>
           <button
             onClick={() => navigateTo("features")}
-            className={`hover:text-blue-500 transition-colors ${currentRoute === "features" ? "text-blue-500" : ""}`}
+            className={`text-sm font-medium transition-colors ${currentRoute === "features"
+              ? "text-blue-500"
+              : "hover:text-blue-500 dark:hover:text-blue-400"
+              }`}
           >
             Features
           </button>
           <button
             onClick={() => navigateTo("agents")}
-            className={`hover:text-blue-500 transition-colors ${currentRoute === "agents" ? "text-blue-500" : ""}`}
+            className={`text-sm font-medium transition-colors ${currentRoute === "agents"
+              ? "text-blue-500"
+              : "hover:text-blue-500 dark:hover:text-blue-400"
+              }`}
           >
             Agents
           </button>
           <button
             onClick={() => navigateTo("pricing")}
-            className={`hover:text-blue-500 transition-colors ${currentRoute === "pricing" ? "text-blue-500" : ""}`}
+            className={`text-sm font-medium transition-colors ${currentRoute === "pricing"
+              ? "text-blue-500"
+              : "hover:text-blue-500 dark:hover:text-blue-400"
+              }`}
           >
             Pricing
           </button>
           <button
             onClick={() => navigateTo("docs")}
-            className={`hover:text-blue-500 transition-colors ${currentRoute === "docs" ? "text-blue-500" : ""}`}
+            className={`text-sm font-medium transition-colors ${currentRoute === "docs"
+              ? "text-blue-500"
+              : "hover:text-blue-500 dark:hover:text-blue-400"
+              }`}
           >
             Docs
           </button>
+          <a
+            href="/editor"
+            className={`text-sm font-medium transition-colors ${"hover:text-blue-500 dark:hover:text-blue-400"
+              }`}
+          >
+            Editor
+          </a>
         </nav>
 
         {/* Actions */}
@@ -438,7 +477,7 @@ function Header({
             </span>
           </button>
 
-          <Button onClick={() => setAuthModalOpen(true)} className="hidden sm:inline-flex">Sign In</Button>
+          <Button onClick={() => window.location.href = "/editor"} className="hidden sm:inline-flex">Go to Editor</Button>
 
           <button
             onClick={() => setSidebarOpen(true)}
@@ -519,14 +558,25 @@ function Sidebar({
                 <span>{item.label}</span>
               </div>
               {item.count > 0 && (
-                <Badge variant="secondary">{item.count}</Badge>
+                <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
+                  {item.count}
+                </span>
               )}
             </button>
           ))}
+          <a
+            href="/editor"
+            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Code2 className="w-5 h-5" />
+              <span>Editor</span>
+            </div>
+          </a>
         </nav>
 
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
-          <Button onClick={onAuthClick} className="w-full">
+          <Button onClick={() => window.location.href = "/editor"} className="w-full">
             View Full Dashboard
           </Button>
         </div>
@@ -634,81 +684,123 @@ function FeaturesSection({ darkMode, onNavigateToFeatures, onPromptGenerate }: {
     {
       icon: Code2,
       title: "AI-Powered Coding",
-      description: "Write, refactor, and debug code with intelligent AI assistance",
+      description: "Write, refactor, and debug code with intelligent AI assistance that understands your project context.",
+      details: [
+        "Context-aware code generation",
+        "Automated refactoring suggestions",
+        "Real-time error detection and fixes",
+        "Multi-language support (TypeScript, Python, Go, Rust, and more)"
+      ]
     },
     {
       icon: Zap,
       title: "Lightning Fast",
-      description: "Instant code generation and real-time collaboration",
+      description: "Instant code generation and real-time collaboration with your team.",
+      details: [
+        "Sub-second response times",
+        "Real-time collaboration",
+        "Instant code suggestions",
+        "Optimized for speed"
+      ]
     },
     {
       icon: Shield,
       title: "Secure by Default",
-      description: "Enterprise-grade security with end-to-end encryption",
+      description: "Enterprise-grade security with end-to-end encryption for all your code.",
+      details: [
+        "End-to-end encryption",
+        "SOC 2 compliant",
+        "Role-based access control",
+        "Audit logging"
+      ]
     },
     {
       icon: Globe,
       title: "Global Collaboration",
-      description: "Work with teams across the world in real-time",
-    },
+      description: "Work with teams across the world in real-time with built-in collaboration tools.",
+      details: [
+        "Real-time collaboration",
+        "Multi-region deployment",
+        "Team workspaces",
+        "Shareable projects"
+      ]
+    }
   ]
 
   return (
-    <section id="features" className="py-24">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl font-bold mb-4">Powerful Features</h2>
-        <p className="text-xl text-gray-600 dark:text-gray-400">
-          Everything you need to build amazing software
-        </p>
-      </div>
+    <section id="features" className="py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <Badge className="mb-4 bg-blue-500/20 text-blue-500 border-blue-500/30">Features</Badge>
+          <h2 className={`text-4xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>Everything You Need to Build</h2>
+          <p className={`text-xl ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+            Powerful features designed for modern development teams
+          </p>
+        </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {features.map((feature, index) => (
-          <motion.div
-            key={feature.title}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className={`h-full ${darkMode ? "bg-gray-900/50 border-gray-800" : ""}`}>
-              <CardHeader>
-                <feature.icon className="w-12 h-12 text-blue-500 mb-4" />
-                <CardTitle>{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {onNavigateToFeatures && (
-        <div className="text-center mt-12">
-          <Button onClick={onNavigateToFeatures} size="lg">
-            Learn More About Features
-          </Button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className={`h-full ${darkMode ? "bg-gray-900/50 border-gray-800" : "bg-white border-gray-200"}`}>
+                <CardHeader>
+                  <div className={`w-12 h-12 rounded-lg ${darkMode ? "bg-blue-500/20" : "bg-blue-100"} flex items-center justify-center mb-4`}>
+                    <feature.icon className={`w-6 h-6 ${darkMode ? "text-blue-500" : "text-blue-600"}`} />
+                  </div>
+                  <CardTitle className={`text-xl ${darkMode ? "text-white" : ""}`}>{feature.title}</CardTitle>
+                  <CardDescription className={darkMode ? "text-gray-400" : ""}>{feature.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    {feature.details.map((detail) => (
+                      <li key={detail} className="flex items-start gap-2">
+                        <Check className={`w-4 h-4 ${darkMode ? "text-blue-500" : "text-blue-600"} flex-shrink-0 mt-0.5`} />
+                        <span className={darkMode ? "text-gray-300" : "text-gray-600"}>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </div>
-      )}
 
-      {/* AI Prompt Generator Demo */}
-      {onPromptGenerate && (
-        <div className="mt-16">
-          <h3 className="text-3xl font-bold text-center mb-8">Try AI Prompt Generation</h3>
-          <PromptInput
-            onGenerate={onPromptGenerate}
-            placeholder="Describe what you want to build with AI..."
-            suggestions={[
-              "Create a React component for a user profile card with avatar and bio",
-              "Generate a Python function to sort a list of dictionaries",
-              "Write a SQL query to find duplicate records in a table",
-              "Create a CSS animation for a loading spinner",
-            ]}
-            showSuggestions
-          />
-        </div>
-      )}
+        {onNavigateToFeatures && (
+          <div className="text-center mt-12">
+            <Button onClick={onNavigateToFeatures} size="lg">
+              <span className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>Learn More About Features</span>
+            </Button>
+          </div>
+        )}
+
+        {/* AI Prompt Generator Demo */}
+        {onPromptGenerate && (
+          <div className="mt-16">
+            <h3 className={`text-3xl font-bold text-center mb-8 ${darkMode ? "text-white" : "text-gray-900"}`}>Try AI Prompt Generation</h3>
+            <PromptInput
+              onGenerate={onPromptGenerate}
+              placeholder="Describe what you want to build with AI..."
+              suggestions={[
+                "Create a React component for a user profile card with avatar and bio",
+                "Generate a Python function to sort a list of dictionaries",
+                "Write a SQL query to find duplicate records in a table",
+                "Create a CSS animation for a loading spinner",
+              ]}
+              showSuggestions
+            />
+          </div>
+        )}
+      </div>
     </section>
   )
 }
@@ -1308,6 +1400,42 @@ function AuthModal({
   step: "left" | "right" | "done"
   setStep: (step: "left" | "right" | "done") => void
 }) {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [upiId, setUpiId] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      setError("Please fill in all fields")
+      return
+    }
+    setIsLoading(true)
+    setError("")
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false)
+      setStep("right")
+    }, 1000)
+  }
+
+  const handlePayment = async () => {
+    if (!upiId) {
+      setError("Please enter your UPI ID")
+      return
+    }
+    setIsLoading(true)
+    setError("")
+
+    // Simulate payment processing
+    setTimeout(() => {
+      setIsLoading(false)
+      setStep("done")
+    }, 1500)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -1334,18 +1462,36 @@ function AuthModal({
           </button>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+
         {step === "left" && (
           <div className="space-y-4">
             <div>
               <Label>Email</Label>
-              <Input type="email" placeholder="your@email.com" className="mt-2" />
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                className="mt-2"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div>
               <Label>Password</Label>
-              <Input type="password" placeholder="••••••••" className="mt-2" />
+              <Input
+                type="password"
+                placeholder="••••••••"
+                className="mt-2"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-            <Button onClick={() => setStep("right")} className="w-full">
-              Sign In
+            <Button onClick={handleSignIn} className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
             <div className="text-center text-sm text-gray-600 dark:text-gray-400">
               Don't have an account? <button className="text-blue-500 hover:underline">Sign up</button>
@@ -1364,10 +1510,21 @@ function AuthModal({
             </div>
             <div>
               <Label>UPI ID</Label>
-              <Input placeholder="yourname@upi" className="mt-2" />
+              <Input
+                placeholder="yourname@upi"
+                className="mt-2"
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+              />
             </div>
-            <Button onClick={() => setStep("done")} className="w-full">
-              Pay with UPI
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              You'll receive a payment request on your UPI app
+            </div>
+            <Button onClick={handlePayment} className="w-full" disabled={isLoading}>
+              {isLoading ? "Processing..." : "Pay with UPI"}
+            </Button>
+            <Button onClick={() => setStep("left")} variant="outline" className="w-full">
+              Back to Sign In
             </Button>
           </div>
         )}
@@ -1383,7 +1540,14 @@ function AuthModal({
                 You now have access to all Pro features
               </p>
             </div>
-            <Button onClick={onClose} className="w-full">
+            <Button
+              onClick={() => {
+                onClose()
+                // Navigate to editor - this would normally use the app's routing
+                window.location.href = "/editor"
+              }}
+              className="w-full"
+            >
               Start Using GSDEV
             </Button>
           </div>

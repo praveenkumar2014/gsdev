@@ -49,6 +49,14 @@ export const NANO_MODELS = [
   { id: "nano-3b", name: "Nano 3B", version: "latest" },
 ]
 
+// Devin Cloud models
+export const DEVIN_MODELS = [
+  { id: "devin-codex-v1", name: "Devin Codex v1", provider: "Devin", openSource: false },
+  { id: "devin-architect-v1", name: "Devin Architect v1", provider: "Devin", openSource: false },
+  { id: "devin-analyst-v1", name: "Devin Analyst v1", provider: "Devin", openSource: false },
+  { id: "devin-auto-v1", name: "Devin Auto v1", provider: "Devin", openSource: false },
+]
+
 export const BANANA_MODELS = [
   { id: "banana-small", name: "Banana Small", version: "latest" },
   { id: "banana-medium", name: "Banana Medium", version: "latest" },
@@ -118,6 +126,7 @@ export const ALL_MODELS = {
   together: TOGETHER_MODELS,
   huggingface: HUGGINGFACE_MODELS,
   ollama: OLLAMA_MODELS,
+  devin: DEVIN_MODELS,
 }
 
 // Open source models (prioritized)
